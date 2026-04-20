@@ -1,0 +1,31 @@
+# Raw downloaded data (regenerable via data/scripts/01_download_data.py)
+data/raw/international_results/
+data/raw/fifa_rankings/
+data/raw/elo/
+data/raw/world_cup/
+data/raw/transfermarkt/
+data/raw/injuries/
+*.csv.gz
+
+# Python
+__pycache__/
+*.py[codz]
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environments
+.venv/
+venv/
+env/
+ENV/
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
