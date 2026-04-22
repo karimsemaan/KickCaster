@@ -1,19 +1,46 @@
+# Core scientific stack — versions chosen to match the environment the
+# shipped .joblib model artefacts were trained and saved with. Loosening
+# these bounds risks InconsistentVersionWarning from sklearn and the
+# numpy 2.x PCG64 BitGenerator error on the HistGBM artefacts.
 pandas>=2.0
-numpy>=1.24
+numpy>=2.0
 pyarrow>=14.0
-scikit-learn>=1.3
+scikit-learn>=1.7
+scipy>=1.11
+
+# Gradient-boosting frameworks — all four are required because the
+# shipped model_artifacts/ contains XGBoost, LightGBM, CatBoost, and
+# sklearn HistGradientBoosting artefacts. notebook 03 glob-loads every
+# file under model_artifacts/, so a missing framework breaks evaluation.
 xgboost>=2.0
+lightgbm>=4.0
+catboost>=1.2
+
+# Deep learning — required for KickCastNet v1 / v2 / v3 (torch) and for
+# temperature / threshold post-processing (scipy, listed above).
+torch>=2.0
+
+# Imbalance handling + hyperparameter search + interpretability
+imbalanced-learn>=0.11
 optuna>=3.4
 shap>=0.43
+
+# Plotting
 matplotlib>=3.7
 seaborn>=0.13
 plotly>=5.18
-imbalanced-learn>=0.11
-soccerdata>=1.0
-beautifulsoup4>=4.12
-requests>=2.31
-lxml>=4.9
+
+# Utilities
 tqdm>=4.66
-kaggle>=1.6
-jupyter>=1.0
 joblib>=1.3
+jupyter>=1.0
+
+# ── Optional: only needed to rebuild raw data from scratch via
+# data/scripts/01_download_data.py. Uncomment if you plan to re-run the
+# data-collection pipeline. Normal evaluation / simulation does not need
+# these because data/processed/ is already populated.
+# soccerdata>=1.0
+# beautifulsoup4>=4.12
+# requests>=2.31
+# lxml>=4.9
+# kaggle>=1.6
