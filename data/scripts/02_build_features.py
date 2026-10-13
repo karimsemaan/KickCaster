@@ -10,6 +10,7 @@ are deltas (home minus away). No data leakage: every feature uses
 only pre-match information.
 """
 
+import json
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -209,6 +210,9 @@ HOST_CONTINENT = {
 
 def load_results():
     """Load international match results, sorted by date. Drop unplayed matches."""
+    pre = OUT / "sim_inputs" / "results.parquet"
+    if pre.exists():
+        return pd.read_parquet(pre)
     df = pd.read_csv(RAW / "international_results" / "results.csv")
     df["date"] = pd.to_datetime(df["date"])
     df = df.dropna(subset=["home_score", "away_score"])
@@ -219,6 +223,22 @@ def load_results():
 
 def load_fifa_rankings():
     """Load FIFA rankings → (sorted_dates, {date: {team: {rank, points, conf}}})."""
+    pre = OUT / "sim_inputs" / "fifa_rankings.parquet"
+    if pre.exists():
+        df = pd.read_parquet(pre)
+        dates = sorted(df["rank_date"].unique())
+        by_date = {}
+        for d, grp in df.groupby("rank_date"):
+            by_date[d] = {
+                row["team"]: {
+                    "rank": int(row["rank"]),
+                    "points": float(row["points"]),
+                    "conf": row["conf"] or "",
+                }
+                for _, row in grp.iterrows()
+            }
+        return dates, by_date
+
     df = pd.read_csv(RAW / "fifa_rankings" / "fifa_ranking.csv")
     df["rank_date"] = pd.to_datetime(df["rank_date"])
     df = df.dropna(subset=["rank", "total_points"])
@@ -240,6 +260,11 @@ def load_fifa_rankings():
 
 def load_players_and_valuations():
     """Load Transfermarkt players + valuations for squad/injury features."""
+    pre_p = OUT / "sim_inputs" / "players.parquet"
+    pre_v = OUT / "sim_inputs" / "valuations.parquet"
+    if pre_p.exists() and pre_v.exists():
+        return pd.read_parquet(pre_p), pd.read_parquet(pre_v)
+
     players = pd.read_csv(
         RAW / "transfermarkt" / "players.csv",
         usecols=[
@@ -357,6 +382,11 @@ def load_injuries(players):
 
 def load_wc_history():
     """Build World Cup track record per team."""
+    pre = OUT / "sim_inputs" / "wc_history.json"
+    if pre.exists():
+        with open(pre, encoding="utf-8") as f:
+            return json.load(f)
+
     matches = pd.read_csv(RAW / "world_cup" / "matches.csv")
     standings = pd.read_csv(RAW / "world_cup" / "group_standings.csv")
 
